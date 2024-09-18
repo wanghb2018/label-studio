@@ -298,15 +298,23 @@ class TaskListAPI(generics.ListCreateAPIView):
         # get project
         view_pk = int_from_request(request.GET, 'view', 0) or int_from_request(request.data, 'view', 0)
         project_pk = int_from_request(request.GET, 'project', 0) or int_from_request(request.data, 'project', 0)
-        if project_pk:
-            project = generics.get_object_or_404(Project, pk=project_pk)
-            self.check_object_permissions(request, project)
-        elif view_pk:
-            view = generics.get_object_or_404(View, pk=view_pk)
-            project = view.project
-            self.check_object_permissions(request, project)
+        if request.user.is_staff:
+            if project_pk:
+                project = generics.get_object_or_404(Project, pk=project_pk)
+                self.check_object_permissions(request, project)
+            elif view_pk:
+                view = generics.get_object_or_404(View, pk=view_pk)
+                project = view.project
+                self.check_object_permissions(request, project)
+            else:
+                return Response({'detail': 'Neither project nor view id specified'}, status=404)
         else:
-            return Response({'detail': 'Neither project nor view id specified'}, status=404)
+            if not view_pk or view_pk == 0:
+                return Response({'detail': 'Neither project nor view id specified'}, status=404)
+            view = generics.get_object_or_404(View, pk=view_pk)
+            if request.user.email != view.data['title']:
+                return Response({'detail': 'Neither project nor view id specified'}, status=404)
+            project = view.project
         # get prepare params (from view or from payload directly)
         prepare_params = get_prepare_params(request, project)
         queryset = self.get_task_queryset(request, prepare_params)
