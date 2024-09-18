@@ -32,7 +32,7 @@ const injector = inject(({ store }) => {
   };
 });
 
-export const LabelButton = injector(({ store, canLabel, size, target, selectedCount }) => {
+export const LabelButton = injector(({ store, canLabel, size, target, selectedCount, labelAll }) => {
   // const all = selectedCount === 0 || allSelected;
   const disabled = target === "annotations";
   const triggerRef = useRef();
@@ -76,7 +76,7 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
   };
 
   const primaryStyle = {
-    width: 160,
+    width: 170,
     padding: 0,
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
@@ -84,7 +84,7 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
   };
 
   const secondStyle = {
-    width: 180,
+    width: 190,
     padding: 0,
     display: isOpen ? "flex" : "none",
     position: "absolute",
@@ -104,9 +104,9 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
             disabled={disabled}
             mod={{ size: size ?? "medium", look: "primary", disabled }}
             style={primaryStyle}
-            onClick={onLabelAll}
+            onClick={onLabelVisible}
           >
-            Label {selectedCount ? selectedCount : "All"} Task{!selectedCount || selectedCount > 1 ? "s" : ""}
+            Label Tasks As Displayed
           </Button>
           <Button
             ref={triggerRef}
@@ -114,14 +114,15 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
             mod={{ size: size ?? "medium", look: "primary", disabled }}
             style={triggerStyle}
             onClick={toggleOpen}
-            aria-label={"Toggle open"}
           >
             <Arrow rotate={isOpen} />
           </Button>
         </div>
-        <Button size={size} style={secondStyle} mod={{ size: size ?? "medium", disabled }} onClick={onLabelVisible}>
-          Label Tasks As Displayed
+        {labelAll &&
+          <Button size={size} style={secondStyle} mod={{ size: size ?? "medium", disabled }} onClick={onLabelAll}>
+          Label {selectedCount ? selectedCount : "All"} Task{!selectedCount || selectedCount > 1 ? "s" : ""}
         </Button>
+        }
       </div>
     </Interface>
   ) : null;

@@ -46,28 +46,13 @@ WORKDIR $LS_DIR
 RUN set -eux \
  && apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests -y \
-    build-essential postgresql-client libmysqlclient-dev mysql-client python3-pip python3-dev \
-    git libxml2-dev libxslt-dev zlib1g-dev gnupg curl lsb-release libpq-dev dnsutils vim && \
+    build-essential postgresql-client python3-pip python3-dev \
+    git libxml2-dev libxslt-dev zlib1g-dev gnupg curl lsb-release libpq-dev dnsutils && \
     apt-get purge --assume-yes --auto-remove --option APT::AutoRemove::RecommendsImportant=false \
      --option APT::AutoRemove::SuggestsImportant=false && rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN --mount=type=cache,target=$PIP_CACHE_DIR,uid=1001,gid=0 \
     pip3 install --upgrade pip setuptools && pip3 install poetry uwsgi uwsgitop
-
-# incapsulate nginx install & configure to a single layer
-RUN set -eux; \
-    curl -sSL https://nginx.org/keys/nginx_signing.key | apt-key add - && \
-    echo "deb https://nginx.org/packages/mainline/ubuntu/ $(lsb_release -cs) nginx" >> /etc/apt/sources.list && \
-    apt-get update && apt-get install -y nginx && \
-    apt-get purge --assume-yes --auto-remove --option APT::AutoRemove::RecommendsImportant=false \
-     --option APT::AutoRemove::SuggestsImportant=false && rm -rf /var/lib/apt/lists/* /tmp/* && \
-    nginx -v
-
-COPY --chown=1001:0 deploy/default.conf /etc/nginx/nginx.conf
-
-RUN set -eux; \
-    mkdir -p $OPT_DIR /var/log/nginx /var/cache/nginx /etc/nginx && \
-    chown -R 1001:0 $OPT_DIR /var/log/nginx /var/cache/nginx /etc/nginx
 
 # Copy essential files for installing Label Studio and its dependencies
 COPY --chown=1001:0 pyproject.toml .
@@ -98,5 +83,6 @@ EXPOSE 8080
 
 USER 1001
 
+RUN chmod +x ./deploy/docker-entrypoint.sh
 ENTRYPOINT ["./deploy/docker-entrypoint.sh"]
 CMD ["label-studio"]

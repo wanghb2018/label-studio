@@ -124,9 +124,7 @@ export const PeoplePage = () => {
           <Space />
 
           <Space>
-            <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
-              Add People
-            </Button>
+            {config.user.is_superuser && <Button icon={<LsPlus />} primary onClick={showInvitationModal}>Add People</Button>}
           </Space>
         </Space>
       </Elem>

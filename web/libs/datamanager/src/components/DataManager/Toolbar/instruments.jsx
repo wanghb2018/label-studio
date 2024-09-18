@@ -109,7 +109,8 @@ export const instruments = {
     return <LoadingPossum />;
   },
   "label-button": ({ size }) => {
-    return <LabelButton size={size} />;
+    const labelALl = window.APP_SETTINGS.user.is_staff
+    return <LabelButton size={size} labelAll={labelALl} />;
   },
   actions: ({ size }) => {
     return <ActionsButton size={size} style={style} />;

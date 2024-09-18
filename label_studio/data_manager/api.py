@@ -3,6 +3,9 @@
 import logging
 
 from asgiref.sync import async_to_sync, sync_to_async
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+
 from core.feature_flags import flag_set
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import int_from_request, load_func
@@ -138,11 +141,11 @@ class ViewAPI(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['project']
     permission_required = ViewClassPermission(
-        GET=all_permissions.tasks_view,
-        POST=all_permissions.tasks_change,
-        PATCH=all_permissions.tasks_change,
-        PUT=all_permissions.tasks_change,
-        DELETE=all_permissions.tasks_delete,
+        GET=all_permissions.data_manager_view,
+        POST=all_permissions.data_manager_create,
+        PATCH=all_permissions.data_manager_change,
+        PUT=all_permissions.data_manager_change,
+        DELETE=all_permissions.data_manager_delete,
     )
 
     def perform_create(self, serializer):
@@ -200,7 +203,15 @@ class ViewAPI(viewsets.ModelViewSet):
         return Response(status=200)
 
     def get_queryset(self):
-        return View.objects.filter(project__organization=self.request.user.active_organization).order_by('order', 'id')
+        views = (View.objects.filter(project__organization=self.request.user.active_organization).order_by('id'))
+
+        user = self.request.user
+        if user.is_superuser or user.is_staff:
+            return views
+        views = views.filter(Q(data__title=user.email))
+        if not views.exists():
+            raise PermissionDenied("No matched tab")
+        return views
 
 
 class TaskPagination(PageNumberPagination):

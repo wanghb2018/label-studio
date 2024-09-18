@@ -6,6 +6,7 @@ import { LsBulb, LsCheck, LsEllipsis, LsMinus } from "../../assets/icons";
 import { Button, Dropdown, Menu, Pagination, Userpic } from "../../components";
 import { Block, Elem } from "../../utils/bem";
 import { absoluteURL } from "../../utils/helpers";
+import {useConfig} from "../../providers/ConfigProvider";
 
 const DEFAULT_CARD_COLORS = ["#FFFFFF", "#FDFDFC"];
 
@@ -61,6 +62,7 @@ const ProjectCard = ({ project }) => {
         }
       : {};
   }, [color]);
+  const config = useConfig();
 
   return (
     <Elem tag={NavLink} name="link" to={`/projects/${project.id}/data`} data-external>
@@ -76,7 +78,7 @@ const ProjectCard = ({ project }) => {
                 e.preventDefault();
               }}
             >
-              <Dropdown.Trigger
+              {config.user.is_superuser && <Dropdown.Trigger
                 content={
                   <Menu contextual>
                     <Menu.Item href={`/projects/${project.id}/settings`}>Settings</Menu.Item>
@@ -85,7 +87,7 @@ const ProjectCard = ({ project }) => {
                 }
               >
                 <Button size="small" type="text" icon={<LsEllipsis />} />
-              </Dropdown.Trigger>
+              </Dropdown.Trigger>}
             </Elem>
           </Elem>
           <Elem name="summary">

@@ -14,6 +14,7 @@ import { DataManagerPage } from "../DataManager/DataManager";
 import { SettingsPage } from "../Settings";
 import "./Projects.styl";
 import { EmptyProjectsList, ProjectsList } from "./ProjectsList";
+import {useConfig} from "../../providers/ConfigProvider";
 
 const getCurrentPage = () => {
   const pageNumberFromURL = new URLSearchParams(location.search).get("page");
@@ -34,6 +35,7 @@ export const ProjectsPage = () => {
   const [modal, setModal] = React.useState(false);
   const openModal = setModal.bind(null, true);
   const closeModal = setModal.bind(null, false);
+  const config = useConfig();
 
   const fetchProjects = async (page = currentPage, pageSize = defaultPageSize) => {
     setNetworkState("loading");
@@ -115,7 +117,7 @@ export const ProjectsPage = () => {
   React.useEffect(() => {
     // there is a nice page with Create button when list is empty
     // so don't show the context button in that case
-    setContextProps({ openModal, showButton: projectsList.length > 0 });
+    setContextProps({ openModal, showButton: projectsList.length > 0, config });
   }, [projectsList.length]);
 
   return (
@@ -162,8 +164,9 @@ ProjectsPage.routes = ({ store }) => [
     },
   },
 ];
-ProjectsPage.context = ({ openModal, showButton }) => {
+ProjectsPage.context = ({ openModal, showButton, config }) => {
   if (!showButton) return null;
+  if (!config.user.is_superuser) return null;
   return (
     <Button onClick={openModal} look="primary" size="compact">
       Create

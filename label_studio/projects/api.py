@@ -43,7 +43,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from tasks.models import Task
 from tasks.serializers import (
@@ -59,7 +58,7 @@ from label_studio.core.utils.common import load_func
 
 logger = logging.getLogger(__name__)
 
-ProjectImportPermission = load_func(settings.PROJECT_IMPORT_PERMISSION)
+HasObjectPermission = load_func(settings.MEMBER_PERM)
 
 _result_schema = openapi.Schema(
     title='Labeling result',
@@ -621,7 +620,6 @@ class ProjectSummaryResetAPI(GetParentObjectMixin, generics.CreateAPIView):
 )
 class ProjectImportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission]
     parser_classes = (JSONParser,)
     serializer_class = ProjectImportSerializer
     queryset = ProjectImport.objects.all()
@@ -647,7 +645,6 @@ class ProjectImportAPI(generics.RetrieveAPIView):
 )
 class ProjectReimportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission]
     parser_classes = (JSONParser,)
     serializer_class = ProjectReimportSerializer
     queryset = ProjectReimport.objects.all()

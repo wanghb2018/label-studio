@@ -8,6 +8,7 @@ import { Space } from "../../components/Space/Space";
 import { useAPI } from "../../providers/ApiProvider";
 import { useLibrary } from "../../providers/LibraryProvider";
 import { useProject } from "../../providers/ProjectProvider";
+import {useConfig} from "../../providers/ConfigProvider";
 import { useContextProps, useFixedLocation, useParams } from "../../providers/RoutesProvider";
 import { addAction, addCrumb, deleteAction, deleteCrumb } from "../../services/breadrumbs";
 import { Block, Elem } from "../../utils/bem";
@@ -71,6 +72,21 @@ export const DataManagerPage = ({ ...props }) => {
   const [crashed, setCrashed] = useState(false);
   const dataManagerRef = useRef();
   const projectId = project?.id;
+  const user = useConfig().user;
+  props.tabControls = {
+      add: user.is_staff,
+      delete: user.is_staff,
+      edit: user.is_staff,
+      duplicate: user.is_staff
+  }
+  if (!user.is_staff) {
+    props.toolbar = "label-button loading-possum error-box | refresh"
+  } else if (!user.is_superuser) {
+    props.toolbar = "actions columns filters ordering label-button loading-possum error-box | refresh view-toggle"
+  }
+  props.interfaces = {
+    import: user.is_superuser
+  }
 
   const init = useCallback(async () => {
     if (!LabelStudio) return;
@@ -214,6 +230,7 @@ DataManagerPage.context = ({ dmRef }) => {
   const location = useFixedLocation();
   const { project } = useProject();
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
+  const isSuperuser = useConfig().user.is_superuser;
 
   const links = {
     "/settings": "Settings",
@@ -286,7 +303,7 @@ DataManagerPage.context = ({ dmRef }) => {
         </Button>
       )}
 
-      {Object.entries(links).map(([path, label]) => (
+      {isSuperuser && Object.entries(links).map(([path, label]) => (
         <Button key={path} tag={NavLink} size="compact" to={`/projects/${project.id}${path}`} data-external>
           {label}
         </Button>

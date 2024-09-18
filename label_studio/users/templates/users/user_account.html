@@ -83,6 +83,7 @@
     </form>
 
     <!-- Token -->
+  {% if user.is_superuser %}
     <form action="" class="access_token__info">
       <header>Access Token</header>
       <div class="field field--wide">
@@ -116,6 +117,7 @@
         </p>
       </div>
     </form>
+  {% endif %}
 
 
     <!-- Organization -->
@@ -143,6 +145,7 @@
     </form>
 
     <!-- Notifications -->
+  {% if user.is_superuser %}
     <form action="{% url 'user-detail' pk=user.pk %}?update-notifications=1" method="patch" class="notifications block-info" id="notifications">
       <header>
         Notifications
@@ -175,6 +178,7 @@
       </table>
 
     </form>
+  {% endif %}
 
 
   </div>

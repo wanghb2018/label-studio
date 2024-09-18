@@ -111,7 +111,7 @@ if DOMAIN_FROM_REQUEST:
     if HOSTNAME and not HOSTNAME.startswith('/'):
         raise ImproperlyConfigured('LABEL_STUDIO_HOST must be a subpath if DOMAIN_FROM_REQUEST is True')
 
-INTERNAL_PORT = '8080'
+INTERNAL_PORT = get_env("PORT", "8080")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_bool_env('DEBUG', True)
