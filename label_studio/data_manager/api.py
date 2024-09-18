@@ -8,6 +8,7 @@ from django.db.models import Q
 
 from core.feature_flags import flag_set
 from core.permissions import ViewClassPermission, all_permissions
+from core.settings.settings import get_label_projects
 from core.utils.common import int_from_request, load_func
 from core.utils.params import bool_from_request
 from data_manager.actions import get_all_actions, perform_action
@@ -309,10 +310,10 @@ class TaskListAPI(generics.ListCreateAPIView):
             else:
                 return Response({'detail': 'Neither project nor view id specified'}, status=404)
         else:
-            if not view_pk or view_pk == 0:
+            if not view_pk or view_pk == 0 or not project_pk or project_pk == 0:
                 return Response({'detail': 'Neither project nor view id specified'}, status=404)
             view = generics.get_object_or_404(View, pk=view_pk)
-            if request.user.email != view.data['title']:
+            if request.user.email != view.data['title'] or project_pk not in get_label_projects():
                 return Response({'detail': 'Neither project nor view id specified'}, status=404)
             project = view.project
         # get prepare params (from view or from payload directly)
